@@ -10,12 +10,25 @@ from streddle_vol_view import show_streddle_vol_view
 from rolling_straddle_view import show_rolling_straddle_view
 # from straddle_view import show_straddle_view  # removed
 import numpy as np
+import os
+import requests
 
 # Set page config
 st.set_page_config(page_title="NIFTY Options Analysis", layout="wide")
 
 # Connect to the database
-db = duckdb.connect('nifty_data.duckdb')
+DB_FILE = 'nifty_data.duckdb'
+GDRIVE_FILE_ID = '1dhU_D9DkXrZVgM7-Kj5a_xyI1SbZkf-S'
+GDRIVE_URL = f'https://drive.google.com/uc?export=download&id={GDRIVE_FILE_ID}'
+
+if not os.path.exists(DB_FILE):
+    with st.spinner('Downloading database from Google Drive...'):
+        r = requests.get(GDRIVE_URL)
+        with open(DB_FILE, 'wb') as f:
+            f.write(r.content)
+        st.success('Database downloaded!')
+
+db = duckdb.connect(DB_FILE)
 
 # Title and description
 st.title("📈 NIFTY Options Analysis Dashboard")
