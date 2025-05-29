@@ -45,6 +45,23 @@ if not os.path.exists(DB_FILE):
 
 db = duckdb.connect(DB_FILE)
 
+# --- PIN Authentication ---
+PIN = "4142"  # Set your desired PIN here
+
+if "authenticated" not in st.session_state:
+    st.session_state["authenticated"] = False
+
+if not st.session_state["authenticated"]:
+    st.title("🔒 Enter PIN to Access Dashboard")
+    pin_input = st.text_input("Enter PIN", type="password")
+    if st.button("Submit"):
+        if pin_input == PIN:
+            st.session_state["authenticated"] = True
+            st.experimental_rerun()
+        else:
+            st.error("Incorrect PIN. Please try again.")
+    st.stop()  # Stop the app here if not authenticated
+
 # Title and description
 st.title("📈 NIFTY Options Analysis Dashboard")
 st.markdown("Interactive dashboard for analyzing NIFTY spot and options data")
