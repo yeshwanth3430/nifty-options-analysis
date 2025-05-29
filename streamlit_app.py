@@ -12,6 +12,8 @@ from rolling_straddle_view import show_rolling_straddle_view
 import numpy as np
 import os
 import requests
+import psutil
+import signal
 
 # Set page config
 st.set_page_config(page_title="NIFTY Options Analysis", layout="wide")
@@ -43,24 +45,16 @@ if not os.path.exists(DB_FILE):
             f.write(r.content)
         st.success('Database downloaded!')
 
+# Check if any process is using the database file
+for proc in psutil.process_iter(['pid', 'name', 'open_files']):
+    try:
+        for file in proc.open_files():
+            if file.path == DB_FILE:
+                os.kill(proc.pid, signal.SIGTERM)
+    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+        pass
+
 db = duckdb.connect(DB_FILE)
-
-# --- PIN Authentication ---
-PIN = "4142"  # Set your desired PIN here
-
-if "authenticated" not in st.session_state:
-    st.session_state["authenticated"] = False
-
-if not st.session_state["authenticated"]:
-    st.title("🔒 Enter PIN to Access Dashboard")
-    pin_input = st.text_input("Enter PIN", type="password")
-    if st.button("Submit"):
-        if pin_input == PIN:
-            st.session_state["authenticated"] = True
-            st.experimental_rerun()
-        else:
-            st.error("Incorrect PIN. Please try again.")
-    st.stop()  # Stop the app here if not authenticated
 
 # Title and description
 st.title("📈 NIFTY Options Analysis Dashboard")

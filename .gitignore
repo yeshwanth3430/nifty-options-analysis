@@ -31,6 +31,9 @@ ENV/
 *.swp
 *.swo
 
+# Database
+*.duckdb
+
 # OS
 .DS_Store
 .DS_Store?
@@ -39,10 +42,6 @@ ENV/
 .Trashes
 ehthumbs.db
 Thumbs.db
-
-# DuckDB
-*.db
-*.duckdb
 
 # Logs
 *.log 

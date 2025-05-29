@@ -2,4 +2,6 @@ streamlit
 duckdb
 pandas
 plotly
-numpy 
+numpy
+requests
+psutil 

@@ -33,3 +33,6 @@ The app uses a DuckDB database (`nifty_data.duckdb`) for storing and querying th
 - Pandas
 - Plotly
 - NumPy 
+
+
+streamlit run streamlit_app.py
