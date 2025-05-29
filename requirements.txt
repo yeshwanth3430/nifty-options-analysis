@@ -2,5 +2,4 @@ streamlit
 duckdb
 pandas
 plotly
-numpy
-requests 
+numpy 
