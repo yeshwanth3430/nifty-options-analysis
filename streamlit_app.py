@@ -16,16 +16,29 @@ import requests
 # Set page config
 st.set_page_config(page_title="NIFTY Options Analysis", layout="wide")
 
+def download_file_from_google_drive(id, destination):
+    URL = "https://docs.google.com/uc?export=download"
+    session = requests.Session()
+    response = session.get(URL, params={'id': id}, stream=True)
+    token = None
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            token = value
+    if token:
+        params = {'id': id, 'confirm': token}
+        response = session.get(URL, params=params, stream=True)
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(32768):
+            if chunk:
+                f.write(chunk)
+
 # Connect to the database
 DB_FILE = 'nifty_data.duckdb'
 GDRIVE_FILE_ID = '1dhU_D9DkXrZVgM7-Kj5a_xyI1SbZkf-S'
-GDRIVE_URL = f'https://drive.google.com/uc?export=download&id={GDRIVE_FILE_ID}'
 
 if not os.path.exists(DB_FILE):
     with st.spinner('Downloading database from Google Drive...'):
-        r = requests.get(GDRIVE_URL)
-        with open(DB_FILE, 'wb') as f:
-            f.write(r.content)
+        download_file_from_google_drive(GDRIVE_FILE_ID, DB_FILE)
         st.success('Database downloaded!')
 
 db = duckdb.connect(DB_FILE)
