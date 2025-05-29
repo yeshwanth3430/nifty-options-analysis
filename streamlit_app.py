@@ -34,11 +34,13 @@ def download_file_from_google_drive(id, destination):
 
 # Connect to the database
 DB_FILE = 'nifty_data.duckdb'
-GDRIVE_FILE_ID = '1dhU_D9DkXrZVgM7-Kj5a_xyI1SbZkf-S'
+DROPBOX_URL = 'https://www.dropbox.com/scl/fi/fdxfzz19mltip6b5yt420/nifty_data.duckdb?rlkey=1o4jpip00fq7789x99sw1gfs0&st=vknhv0qn&dl=1'
 
 if not os.path.exists(DB_FILE):
-    with st.spinner('Downloading database from Google Drive...'):
-        download_file_from_google_drive(GDRIVE_FILE_ID, DB_FILE)
+    with st.spinner('Downloading database from Dropbox...'):
+        r = requests.get(DROPBOX_URL)
+        with open(DB_FILE, 'wb') as f:
+            f.write(r.content)
         st.success('Database downloaded!')
 
 db = duckdb.connect(DB_FILE)
