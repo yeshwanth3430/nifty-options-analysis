@@ -15,6 +15,8 @@ import requests
 import psutil
 import signal
 from backtest_view import show_backtest_view
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from lib.live_api import LiveAPIClient
 import time
 from streamlit_autorefresh import st_autorefresh
