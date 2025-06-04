@@ -10,11 +10,14 @@ import os
 import duckdb
 import concurrent.futures
 from typing import List, Dict, Any
+from streamlit_extras.st_autorefresh import st_autorefresh
+import streamlit as st
+from lib.live_api import LiveAPIClient
 
 # Initialize SDK
 api_key = "3437N18UK04d3jJ883fS03*A16h61654"
 api_secret = "q^A5956!48195N5)28S50F76)vO99s41"
-session_token = "51659117"
+session_token = "51699952"
 
 breeze = BreezeConnect(api_key=api_key)
 
@@ -363,10 +366,10 @@ if __name__ == "__main__":
         "19-09-2024", "26-09-2024", "03-10-2024", "10-10-2024", "17-10-2024",
         "24-10-2024", "31-10-2024", "07-11-2024", "14-11-2024", "21-11-2024",
         "28-11-2024", "05-12-2024", "12-12-2024", "19-12-2024", "26-12-2024",
-        "02-01-2025", "09-01-2025", "16-01-2025", "30-01-2025", "06-02-2025",
+        "02-01-2025", "09-01-2025", "16-01-2025","23-01-2025", "30-01-2025", "06-02-2025",
         "13-02-2025", "20-02-2025", "27-02-2025", "06-03-2025", "13-03-2025",
         "20-03-2025", "27-03-2025", "03-04-2025", "09-04-2025", "17-04-2025",
-        "24-04-2025", "30-04-2025"
+        "24-04-2025", "30-04-2025", "01-05-2025", "8-05-2025", "15-05-2025", "22-05-2025","29-05-2025"
     ]
 
     # Get date range from user
@@ -412,3 +415,17 @@ db.execute("SELECT * FROM options_data WHERE strike_price = 18000 AND option_typ
 
 # Get daily high and low for spot
 db.execute("SELECT date, MAX(high) as daily_high, MIN(low) as daily_low FROM spot_data GROUP BY date").fetchdf()
+
+# Replace with your real session key
+SESSION_KEY = "YOUR_SESSION_KEY"
+
+client = LiveAPIClient(live_db_file='nifty_live_data.duckdb')
+client.connect(SESSION_KEY)
+
+while True:
+    ltp = client.get_nifty_spot_live()  # This should fetch from Breeze and save to DB
+    print(f"Fetched and stored LTP: {ltp}")
+    time.sleep(1)  # Fetch every second
+
+    # Add this new line to see the received live data
+    print(f"Received live data: {ltp}")
