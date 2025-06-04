@@ -15,9 +15,6 @@ import requests
 import psutil
 import signal
 from backtest_view import show_backtest_view
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from lib.live_api import LiveAPIClient
 import time
 from streamlit_autorefresh import st_autorefresh
 
@@ -73,18 +70,17 @@ max_date = date_info['max_date'].iloc[0]
 num_dates = date_info['num_dates'].iloc[0]
 
 # Title and description
-if st.session_state['nav_selection'] != 'Live PT':
-    st.title("📈 NIFTY Options Analysis Dashboard")
-    st.markdown("Interactive dashboard for analyzing NIFTY spot and options data")
-    st.info(f"Available data from **{min_date}** to **{max_date}** (Total trading days: {num_dates})")
-    # Date picker on main page
-    selected_date = st.date_input(
-        "Select Date for Analysis",
-        value=max_date,
-        min_value=min_date,
-        max_value=max_date,
-        key="main_date_picker"
-    )
+st.title("📈 NIFTY Options Analysis Dashboard")
+st.markdown("Interactive dashboard for analyzing NIFTY spot and options data")
+st.info(f"Available data from **{min_date}** to **{max_date}** (Total trading days: {num_dates})")
+# Date picker on main page
+selected_date = st.date_input(
+    "Select Date for Analysis",
+    value=max_date,
+    min_value=min_date,
+    max_value=max_date,
+    key="main_date_picker"
+)
 
 # --- Creative Sidebar Navigation ---
 with st.sidebar:
@@ -94,31 +90,21 @@ with st.sidebar:
     st.button('➕ Straddle and Vol', key='straddle_vol_btn')
     st.markdown('---')
     nav_options = [
-        #'📊 Straddle',  # removed
         '🧪 Backtest',
         '🔄 Rolling Straddle',
-        '➕ Straddle and Vol',
-        '🔴 Live PT'
+        '➕ Straddle and Vol'
     ]
     nav_choice = st.radio(
         'Go to:',
         nav_options,
-        index=[
-            #'Straddle',  # removed
-            'Backtest',
-            'Rolling Straddle',
-            'Straddle and Vol',
-            'Live PT'
-        ].index(st.session_state.get('nav_selection', 'Rolling Straddle')) if st.session_state.get('nav_selection', 'Rolling Straddle') in ['Backtest', 'Rolling Straddle', 'Straddle and Vol', 'Live PT'] else 0,
+        index=nav_options.index(st.session_state.get('nav_selection', 'Rolling Straddle')) if st.session_state.get('nav_selection', 'Rolling Straddle') in nav_options else 0,
         key='nav_radio'
     )
     # Map emoji nav to session state
     nav_map = {
-        #'📊 Straddle': 'Straddle',  # removed
         '🧪 Backtest': 'Backtest',
         '🔄 Rolling Straddle': 'Rolling Straddle',
-        '➕ Straddle and Vol': 'Straddle and Vol',
-        '🔴 Live PT': 'Live PT'
+        '➕ Straddle and Vol': 'Straddle and Vol'
     }
     st.session_state['nav_selection'] = nav_map[nav_choice]
 
@@ -129,33 +115,6 @@ elif st.session_state['nav_selection'] == 'Rolling Straddle':
     show_rolling_straddle_view(db, selected_date)
 elif st.session_state['nav_selection'] == 'Backtest':
     show_backtest_view(db)
-elif st.session_state['nav_selection'] == 'Live PT':
-    st.header("🔴 Live PT (Live Paper Trading)")
-    # Auto-refresh every 5 seconds
-    st_autorefresh(interval=5000, key="live_nifty_refresh")
-    # Connect to the live data database in read-only mode
-    live_db = duckdb.connect('live_market_data.db', read_only=True)
-    if st.button("Refresh LTP"):
-        st.session_state['refresh_ltp'] = True
-    # Query the last 200 live ticks from live_quotes for NIFTY
-    df = live_db.execute(
-        """
-        SELECT * FROM live_quotes
-        WHERE stock_code = 'NIFTY'
-        ORDER BY timestamp DESC
-        LIMIT 200
-        """
-    ).fetchdf()
-    if not df.empty:
-        ltp = df['last_traded_price'].iloc[0]
-        st.info(f"NIFTY Spot Live LTP (from DB): **{ltp}**", icon="📈")
-        st.subheader("Last 200 Live NIFTY Ticks (auto-refreshes)")
-        st.dataframe(df)
-    else:
-        st.warning("No live LTP data available yet.")
-    st.subheader("Run Live Backtest")
-    st.info("Live backtest options will appear here after API integration.")
-    live_db.close()
 else:
     st.markdown("<div style='text-align:center; margin-top: 100px;'><h2>Will be available soon</h2></div>", unsafe_allow_html=True)
 
